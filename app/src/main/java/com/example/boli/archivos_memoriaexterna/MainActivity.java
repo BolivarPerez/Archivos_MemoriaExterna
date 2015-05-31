@@ -20,7 +20,7 @@ import java.io.OutputStreamWriter;
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
 
-
+    //Se declaran variables.
     private EditText txtTexto;
     private Button btnGuardar, btnAbrir;
     private static final int READ_BLOCK_SIZE = 100;
@@ -30,21 +30,21 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Se enlazan EditText y los botones.
         txtTexto = (EditText) findViewById(R.id.txtArchivo);
         btnGuardar = (Button) findViewById(R.id.btnGuardar);
         btnAbrir = (Button) findViewById(R.id.btnAbrir);
+
+        //Se agrega funcionalidad del click a los botones.
         btnGuardar.setOnClickListener(this);
         btnAbrir.setOnClickListener(this);
     }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -60,6 +60,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
+    //Metodo onclick para que los botones funcionen al dar click sobre ellos.
     @Override
     public void onClick(View v) {
         File sdCard, directory, file = null;
@@ -68,22 +69,31 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             // validamos si se encuentra montada nuestra memoria externa
             if (Environment.getExternalStorageState().equals("mounted")) {
 
+                // Obtenemos el directorio de la memoria externa
                 sdCard = Environment.getExternalStorageDirectory();
                 if (v.equals(btnGuardar)) {
                     String str = txtTexto.getText().toString();
+
+                    // Clase que permite grabar texto en un archivo
                     FileOutputStream fout = null;
                     try {
+                        // Se instancia un objeto File para crear un nuevo directorio en la memoria externa
                         directory = new File(sdCard.getAbsolutePath() + "/Mis archivos");
+
+                        // Se crea el nuevo directorio donde se creara el archivo
                         directory.mkdirs();
 
+                        // Creamos el archivo en el nuevo directorio creado.
                         file = new File(directory, "MiArchivo.txt");
                         fout = new FileOutputStream(file);
 
+                        // Convierte un stream de caracteres en un stream de bytes
                         OutputStreamWriter ows = new OutputStreamWriter(fout);
-                        ows.write(str);
-                        ows.flush();
-                        ows.close();
+                        ows.write(str); // Escribe en el buffer la cadena de texto
+                        ows.flush();    // Volca lo que hay en el buffer al archivo
+                        ows.close();   // Cierra el archivo de texto
 
+                        //Muestra el mensaje de confirmacion
                         Toast.makeText(getBaseContext(), "El archivo se ha almacenado!!!", Toast.LENGTH_SHORT).show();
                         txtTexto.setText("");
 
@@ -91,31 +101,46 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                         e.printStackTrace();
                     }
                 }
+                //Funcionalidad del boton abrir.
                 if (v.equals(btnAbrir)) {
                     try {
+
+                        //Obtenemos el direcorio donde se encuentra nuestro archivo a leer
                         directory = new File(sdCard.getAbsolutePath() + "/Mis archivos");
+
+                        //Creamos un objeto File de nuestro archivo a leer.
                         file = new File(directory, "MiArchivo.txt");
+
+                        //Creamos un objeto de la clase FileInputStream el cual representa un stream del archivo que vamos a leer.
                         FileInputStream fin = new FileInputStream(file);
+
+                        //Creaos un objeto InputStreamReader que nos permitira leer el stream del archivo abierto.
                         InputStreamReader isr = new InputStreamReader(fin);
                         char[] inputBuffer = new char[READ_BLOCK_SIZE];
                         String str = "";
 
+                        // Se lee el archivo de texto mientras no se llegue al  final  de él.
                         int charRead;
                         while ((charRead = isr.read(inputBuffer)) > 0) {
+
+                            // Se lee por bloques de 100 caracteres ya que se desconoce el tamaño del texto  y se va copiando a una cadena de texto.
                             String strRead = String.copyValueOf(inputBuffer, 0, charRead);
                             str += strRead;
 
                             inputBuffer = new char[READ_BLOCK_SIZE];
                         }
-
+                        // Se muestra el texto leido en la caje de texto.
                         txtTexto.setText(str);
                         isr.close();
+
+                        //Muestra el mensaje de confirmacion
                         Toast.makeText(getBaseContext(), "El archivo ha sido cargado", Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             } else {
+                //Muestra el mensaje de confirmacion
                 Toast.makeText(getBaseContext(), "El almacenamineto externo no se encuentra disponible", Toast.LENGTH_LONG).show();
             }
 
